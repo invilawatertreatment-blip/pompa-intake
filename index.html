@@ -3,565 +3,983 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zero Capex Water Infrastructure | INVILA GROUP</title>
-    
-    <!-- Tailwind CSS (Auto-compile) -->
+    <title>Trainer Kit WTP Invila - SCADA Enterprise Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts (Opsional agar tulisan rapi) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
-
-    <!-- React & ReactDOM (Untuk menjalankan JSX tanpa Node.js) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel (Compiler JSX di dalam Browser) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
-
-        // --- SISTEM PEMBACA IKON UNTUK HTML STATIS ---
-        const Icon = ({ name, className }) => {
-            useEffect(() => {
-                lucide.createIcons();
-            });
-            return <i data-lucide={name} className={className}></i>;
-        };
-
-        // Pemetaan Ikon sesuai kode Anda
-        const ArrowRight = (p) => <Icon name="arrow-right" {...p} />;
-        const BarChart3 = (p) => <Icon name="bar-chart-3" {...p} />;
-        const Building2 = (p) => <Icon name="building-2" {...p} />;
-        const CheckCircle2 = (p) => <Icon name="check-circle-2" {...p} />;
-        const ChevronRight = (p) => <Icon name="chevron-right" {...p} />;
-        const ClipboardCheck = (p) => <Icon name="clipboard-check" {...p} />;
-        const Droplets = (p) => <Icon name="droplets" {...p} />;
-        const Factory = (p) => <Icon name="factory" {...p} />;
-        const MessageCircle = (p) => <Icon name="message-circle" {...p} />;
-        const ShieldCheck = (p) => <Icon name="shield-check" {...p} />;
-        const Wallet = (p) => <Icon name="wallet" {...p} />;
-        const Waves = (p) => <Icon name="waves" {...p} />;
-
-        // =================================================================
-        // DI BAWAH INI ADALAH KODE REACT ASLI ANDA (TANPA PERUBAHAN APAPUN)
-        // =================================================================
-
-        const currency = (value) =>
-          new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            maximumFractionDigits: 0,
-          }).format(value);
-
-        const NumberStat = ({ label, value, hint, dark = false }) => (
-          <div
-            className={`rounded-2xl border p-5 shadow-sm ${
-              dark
-                ? 'border-white/10 bg-white/5 text-white'
-                : 'border-slate-300 bg-white text-slate-950'
-            }`}
-          >
-            <p
-              className={`text-xs font-semibold uppercase tracking-[0.18em] ${
-                dark ? 'text-slate-400' : 'text-slate-500'
-              }`}
-            >
-              {label}
-            </p>
-            <div className="mt-3 text-2xl font-semibold tracking-tight">{value}</div>
-            {hint ? (
-              <p className={`mt-2 text-sm ${dark ? 'text-slate-300' : 'text-slate-500'}`}>{hint}</p>
-            ) : null}
-          </div>
-        );
-
-        const FeatureCard = ({ icon: IconCmp, title, description }) => (
-          <div className="rounded-3xl border border-slate-700/70 bg-slate-900/70 p-7 shadow-xl shadow-black/10 transition duration-300 hover:-translate-y-1 hover:border-amber-400/30">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400/10 text-amber-300">
-              <IconCmp className="h-6 w-6" />
-            </div>
-            <h3 className="mt-5 text-xl font-semibold tracking-tight text-white">{title}</h3>
-            <p className="mt-3 text-base leading-7 text-slate-300">{description}</p>
-          </div>
-        );
-
-        const StepCard = ({ number, title, description }) => (
-          <div className="rounded-3xl border border-slate-300 bg-white p-6 shadow-lg shadow-slate-900/5 transition duration-300 hover:-translate-y-1 hover:border-amber-500/40">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
-              {number}
-            </div>
-            <h4 className="mt-5 text-lg font-semibold text-slate-950">{title}</h4>
-            <p className="mt-2 leading-7 text-slate-600">{description}</p>
-          </div>
-        );
-
-        const SectorBadge = ({ children, dark = false }) => (
-          <div
-            className={`rounded-full border px-4 py-2 text-sm font-medium shadow-sm ${
-              dark
-                ? 'border-white/10 bg-white/5 text-slate-200'
-                : 'border-slate-300 bg-white text-slate-700'
-            }`}
-          >
-            {children}
-          </div>
-        );
-
-        const SectionEyebrow = ({ children, dark = false }) => (
-          <p
-            className={`text-sm font-semibold uppercase tracking-[0.22em] ${
-              dark ? 'text-amber-300' : 'text-teal-700'
-            }`}
-          >
-            {children}
-          </p>
-        );
-
-        function App() {
-          const [volume, setVolume] = useState(1000);
-          const [currentCost, setCurrentCost] = useState(7000);
-
-          const invilaRate = 4500;
-          const monthlySaving = useMemo(
-            () => Math.max(0, (currentCost - invilaRate) * volume * 30),
-            [currentCost, volume]
-          );
-          const yearlySaving = monthlySaving * 12;
-
-          const whatsappLink = 'https://wa.me/6285219493322';
-          const portalLink = 'https://invila.asia';
-
-          return (
-            <div className="min-h-screen scroll-smooth bg-[#d9dde1] text-slate-900 antialiased">
-              <div className="absolute inset-x-0 top-0 -z-10 h-[720px] bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_32%),linear-gradient(180deg,#f4f5f6_0%,#d9dde1_38%,#0f1720_100%)]" />
-
-              <header className="sticky top-0 z-40 border-b border-slate-700/10 bg-[#e9ecef]/85 backdrop-blur-xl">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-sm font-bold text-white shadow-lg shadow-slate-900/20">
-                      I
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">INVILA TM</div>
-                      <div className="text-sm text-slate-900">Zero Capex Water Infrastructure</div>
-                    </div>
-                  </div>
-
-                  <div className="hidden items-center gap-8 md:flex">
-                    <a href="#solution" className="text-sm font-medium text-slate-600 transition hover:text-slate-950">Solusi</a>
-                    <a href="#calculator" className="text-sm font-medium text-slate-600 transition hover:text-slate-950">Kalkulator</a>
-                    <a href="#process" className="text-sm font-medium text-slate-600 transition hover:text-slate-950">Cara Kerja</a>
-                    <a href={portalLink} target="_blank" className="text-sm font-medium text-slate-600 transition hover:text-slate-950">Portal Teknis</a>
-                  </div>
-
-                  <a
-                    href={whatsappLink}
-                    target="_blank"
-                    className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-400"
-                  >
-                    Chat WhatsApp
-                    <ArrowRight className="h-4 w-4" />
-                  </a>
-                </div>
-              </header>
-
-              <a
-                href={whatsappLink}
-                target="_blank"
-                className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-2xl shadow-black/20 transition hover:scale-105 hover:bg-amber-400"
-              >
-                <MessageCircle className="h-4 w-4" />
-                Chat INVILA
-              </a>
-
-              <main>
-                <section className="mx-auto grid max-w-7xl gap-14 px-6 pb-20 pt-16 lg:grid-cols-[1.12fr_0.88fr] lg:px-8 lg:pb-28 lg:pt-20">
-                  <div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-teal-700/15 bg-teal-900/5 px-4 py-2 text-sm font-medium text-teal-900">
-                      <Waves className="h-4 w-4" />
-                      SCADA-IoT Enabled Infrastructure
-                    </div>
-
-                    <h1 className="mt-8 max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 md:text-6xl md:leading-[1.03]">
-                      Infrastruktur Air Industri yang Lebih Cerdas, Tanpa Membebani Capex Perusahaan.
-                    </h1>
-
-                    <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-700 md:text-xl">
-                      Dengan model <span className="font-semibold text-slate-950">Zero Capex Infrastructure</span>, INVILA membantu perusahaan mendapatkan sistem air industri yang terukur, termonitor, dan siap operasional tanpa investasi awal yang mengunci likuiditas.
-                    </p>
-
-                    <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                      <a
-                        href={whatsappLink}
-                        target="_blank"
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-                      >
-                        Chat untuk Analisa Kebutuhan
-                        <ArrowRight className="h-4 w-4" />
-                      </a>
-                      <a
-                        href={portalLink}
-                        target="_blank"
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-400/80 px-6 py-4 text-sm font-semibold text-slate-900 transition hover:border-slate-500 hover:bg-white/50"
-                      >
-                        Lihat Kapabilitas Teknis
-                        <ChevronRight className="h-4 w-4" />
-                      </a>
-                    </div>
-
-                    <div className="mt-12 grid gap-4 sm:grid-cols-3">
-                      <NumberStat label="Investasi Awal" value="0 IDR" hint="Struktur pembiayaan dirancang tanpa capex awal." />
-                      <NumberStat label="Monitoring" value="SCADA-IoT" hint="Visibilitas performa dan operasional lebih terukur." />
-                      <NumberStat label="Model Layanan" value="Managed" hint="Operasi dan pemeliharaan didukung INVILA." />
-                    </div>
-                  </div>
-
-                  <div className="rounded-[32px] border border-slate-300 bg-[linear-gradient(180deg,rgba(255,255,255,0.95),rgba(235,239,242,0.96))] p-8 shadow-2xl shadow-slate-900/10 lg:p-10">
-                    <div className="flex items-center justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Untuk Pengambil Keputusan</p>
-                        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Lebih ringan bagi cash flow. Lebih jelas bagi operasional.</h2>
-                      </div>
-                      <div className="hidden h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white md:flex">
-                        <BarChart3 className="h-7 w-7" />
-                      </div>
-                    </div>
-
-                    <div className="mt-8 space-y-5">
-                      {[
-                        'Likuiditas dapat difokuskan untuk ekspansi, peningkatan kapasitas, atau kebutuhan inti bisnis.',
-                        'Kinerja sistem lebih mudah dipantau lewat monitoring SCADA-IoT yang membantu keputusan lebih cepat.',
-                        'Risiko operasional dan kepatuhan lingkungan dapat dikelola lebih terkendali dengan dukungan INVILA.',
-                      ].map((item) => (
-                        <div key={item} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white/80 p-4">
-                          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
-                          <p className="text-sm leading-7 text-slate-700">{item}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-8 rounded-3xl bg-slate-900 p-6 text-white">
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-300">Arah CTA Utama</p>
-                      <p className="mt-3 text-lg leading-8 text-slate-100">
-                        Mulai dari diskusi kebutuhan dan evaluasi kondisi eksisting, lalu lanjutkan ke visit factory untuk analisa yang lebih relevan dengan kondisi lapangan.
-                      </p>
-                      <a
-                        href={whatsappLink}
-                        target="_blank"
-                        className="mt-5 inline-flex items-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-400"
-                      >
-                        Mulai Diskusi via WhatsApp
-                        <ArrowRight className="h-4 w-4" />
-                      </a>
-                    </div>
-                  </div>
-                </section>
-
-                <section id="calculator" className="border-y border-slate-700/10 bg-[#cdd3d8] py-20">
-                  <div className="mx-auto grid max-w-7xl gap-10 px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
-                    <div>
-                      <SectionEyebrow>Kalkulator Sederhana</SectionEyebrow>
-                      <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 md:text-5xl">
-                        Lihat gambaran awal potensi efisiensi biaya Anda.
-                      </h2>
-                      <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-700">
-                        Setelah memahami kerangka modelnya, tahap berikutnya adalah melihat seberapa relevan pendekatan INVILA terhadap kondisi eksisting perusahaan Anda.
-                      </p>
-
-                      <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                        <NumberStat label="Tarif INVILA" value={currency(invilaRate)} hint="Ilustrasi rate acuan untuk simulasi awal." />
-                        <NumberStat label="Estimasi Tahunan" value={currency(yearlySaving)} hint="Potensi efisiensi jika asumsi simulasi stabil." />
-                      </div>
-                    </div>
-
-                    <div className="rounded-[32px] border border-slate-300 bg-white p-8 shadow-2xl shadow-slate-900/10">
-                      <div className="grid gap-8 md:grid-cols-2 md:gap-10">
-                        <div className="space-y-8">
-                          <div>
-                            <label className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-                              Volume Air Harian (m³)
-                            </label>
-                            <div className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-                              {volume.toLocaleString('id-ID')}
-                            </div>
-                            <input
-                              type="range"
-                              min="100"
-                              max="5000"
-                              step="50"
-                              value={volume}
-                              onChange={(e) => setVolume(Number(e.target.value))}
-                              className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-teal-700"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-                              Biaya Saat Ini (IDR/m³)
-                            </label>
-                            <div className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-                              {currency(currentCost)}
-                            </div>
-                            <input
-                              type="range"
-                              min="1000"
-                              max="15000"
-                              step="250"
-                              value={currentCost}
-                              onChange={(e) => setCurrentCost(Number(e.target.value))}
-                              className="mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-amber-500"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col justify-between rounded-[28px] bg-[linear-gradient(180deg,#0f1720_0%,#1f2d3a_100%)] p-7 text-white">
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-300">
-                              Estimasi Penghematan per Bulan
-                            </p>
-                            <div className="mt-4 text-4xl font-semibold tracking-tight md:text-5xl">
-                              {currency(monthlySaving)}
-                            </div>
-                            <div className="mt-5 inline-flex items-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                              <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-300">
-                                  Estimasi per Tahun
-                                </p>
-                                <p className="mt-1 text-lg font-semibold text-white">
-                                  {currency(yearlySaving)}
-                                </p>
-                              </div>
-                            </div>
-                            <p className="mt-4 text-sm leading-7 text-slate-300">
-                              Simulasi berbasis selisih biaya eksisting terhadap rate ilustratif INVILA. Ini memberi konteks awal sebelum masuk ke analisa kebutuhan yang lebih rinci.
-                            </p>
-                          </div>
-
-                          <div className="mt-8 space-y-3">
-                            <a
-                              href={whatsappLink}
-                              target="_blank"
-                              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-500 px-5 py-4 text-sm font-semibold text-slate-950 transition hover:bg-amber-400"
-                            >
-                              Chat WhatsApp untuk Analisa
-                              <ArrowRight className="h-4 w-4" />
-                            </a>
-                            <a
-                              href={portalLink}
-                              target="_blank"
-                              className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-4 text-sm font-semibold text-white transition hover:bg-white/10"
-                            >
-                              Tinjau Portal Teknis
-                              <ChevronRight className="h-4 w-4" />
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                <section id="solution" className="bg-[linear-gradient(180deg,#0f1720_0%,#111827_100%)] py-20 text-white lg:py-24">
-                  <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div className="max-w-3xl">
-                      <SectionEyebrow dark>Nilai untuk Bisnis</SectionEyebrow>
-                      <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-5xl">
-                        Bukan sekadar teknologi, tetapi keputusan bisnis yang lebih matang.
-                      </h2>
-                      <p className="mt-5 text-lg leading-8 text-slate-300">
-                        Semakin jauh pengunjung men-scroll, semakin jelas bahwa model INVILA bukan hanya soal instalasi sistem, tetapi soal menjaga ritme produksi, visibilitas operasional, dan struktur biaya yang lebih terkendali.
-                      </p>
-                    </div>
-
-                    <div className="mt-12 grid gap-6 lg:grid-cols-3">
-                      <FeatureCard
-                        icon={Wallet}
-                        title="Menjaga fleksibilitas cash flow"
-                        description="Perusahaan dapat menghindari capex awal yang besar dan mengalokasikan dana untuk prioritas bisnis yang lebih strategis."
-                      />
-                      <FeatureCard
-                        icon={Droplets}
-                        title="Kinerja sistem lebih terukur"
-                        description="Monitoring berbasis SCADA-IoT membantu tim melihat performa, status operasional, dan kebutuhan tindak lanjut dengan lebih jelas."
-                      />
-                      <FeatureCard
-                        icon={ShieldCheck}
-                        title="Operasional lebih terkendali"
-                        description="Pendekatan managed service membantu perusahaan mengurangi beban pengelolaan harian sekaligus menjaga standar operasional dan kepatuhan."
-                      />
-                    </div>
-
-                    <div className="mt-10 rounded-[32px] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/20">
-                      <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-                        <div>
-                          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-amber-300">Kenapa ini penting?</p>
-                          <h3 className="mt-3 text-2xl font-semibold text-white">
-                            Saat beban operasional makin kompleks, perusahaan membutuhkan partner yang membantu menyederhanakan keputusan.
-                          </h3>
-                        </div>
-                        <a
-                          href={whatsappLink}
-                          target="_blank"
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-4 text-sm font-semibold text-slate-950 transition hover:bg-amber-400"
-                        >
-                          Bahas Kebutuhan Anda
-                          <ArrowRight className="h-4 w-4" />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="bg-[linear-gradient(180deg,#111827_0%,#0b1220_100%)] py-20 text-white">
-                  <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
-                      <div>
-                        <SectionEyebrow dark>Kesesuaian Implementasi</SectionEyebrow>
-                        <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-5xl">
-                          Relevan untuk kawasan industri, utilitas air, dan fasilitas produksi.
-                        </h2>
-                        <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
-                          Di titik ini, pengunjung sudah tidak hanya melihat manfaat finansial. Mereka mulai melihat apakah model ini benar-benar cocok untuk konteks operasional mereka.
-                        </p>
-                      </div>
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                          <Factory className="h-7 w-7 text-amber-300" />
-                          <h3 className="mt-5 text-xl font-semibold">Manufaktur</h3>
-                          <p className="mt-3 leading-7 text-slate-300">Untuk kebutuhan utilitas air yang mendukung kontinuitas proses produksi.</p>
-                        </div>
-                        <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                          <Building2 className="h-7 w-7 text-amber-300" />
-                          <h3 className="mt-5 text-xl font-semibold">Kawasan Industri</h3>
-                          <p className="mt-3 leading-7 text-slate-300">Untuk pengelolaan infrastruktur bersama yang membutuhkan kontrol dan efisiensi lebih baik.</p>
-                        </div>
-                        <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                          <ClipboardCheck className="h-7 w-7 text-amber-300" />
-                          <h3 className="mt-5 text-xl font-semibold">Environment & Compliance</h3>
-                          <p className="mt-3 leading-7 text-slate-300">Untuk organisasi yang perlu meningkatkan visibilitas dan pengendalian kepatuhan operasional.</p>
-                        </div>
-                        <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                          <Droplets className="h-7 w-7 text-amber-300" />
-                          <h3 className="mt-5 text-xl font-semibold">Utilitas Air</h3>
-                          <p className="mt-3 leading-7 text-slate-300">Untuk sistem yang perlu beroperasi andal dengan monitoring yang lebih baik.</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-10 flex flex-wrap gap-3">
-                      <SectorBadge dark>Zero Capex Infrastructure</SectorBadge>
-                      <SectorBadge dark>SCADA-IoT Monitoring</SectorBadge>
-                      <SectorBadge dark>Managed Operations Support</SectorBadge>
-                      <SectorBadge dark>Visit Factory Oriented</SectorBadge>
-                    </div>
-                  </div>
-                </section>
-
-                <section id="process" className="bg-[#e7eaed] py-20 lg:py-24">
-                  <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div className="max-w-3xl">
-                      <SectionEyebrow>Cara Kerja</SectionEyebrow>
-                      <h2 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 md:text-5xl">
-                        Dari ketertarikan awal menuju langkah nyata yang lebih relevan.
-                      </h2>
-                      <p className="mt-5 text-lg leading-8 text-slate-700">
-                        Bagian ini dibuat untuk mendorong pengunjung merasa bahwa langkah selanjutnya sederhana, masuk akal, dan layak dilakukan sekarang.
-                      </p>
-                    </div>
-
-                    <div className="mt-12 grid gap-6 md:grid-cols-3">
-                      <StepCard
-                        number="1"
-                        title="Diskusi kebutuhan"
-                        description="Mulai dari pembicaraan singkat untuk memahami volume, kondisi eksisting, target kualitas, dan konteks operasional perusahaan."
-                      />
-                      <StepCard
-                        number="2"
-                        title="Analisa & visit factory"
-                        description="Tim INVILA meninjau kondisi lapangan agar pendekatan yang diajukan lebih relevan dengan kebutuhan nyata di fasilitas Anda."
-                      />
-                      <StepCard
-                        number="3"
-                        title="Rancangan model solusi"
-                        description="Perusahaan mendapatkan arahan awal mengenai pendekatan sistem, struktur layanan, dan potensi dampak bagi operasional maupun finansial."
-                      />
-                    </div>
-
-                    <div className="mt-10 rounded-[32px] border border-slate-300 bg-white p-8 shadow-2xl shadow-slate-900/10">
-                      <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-                        <div>
-                          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-teal-700">Semakin jelas, semakin mudah mengambil langkah</p>
-                          <h3 className="mt-3 text-2xl font-semibold text-slate-950">
-                            Setelah melihat potensi efisiensi, konteks operasional, dan alur kerjanya, tahap paling logis adalah memulai percakapan langsung dengan tim INVILA.
-                          </h3>
-                        </div>
-                        <a
-                          href={whatsappLink}
-                          target="_blank"
-                          className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-6 py-4 text-sm font-semibold text-white transition hover:bg-slate-800"
-                        >
-                          Chat WhatsApp Sekarang
-                          <ArrowRight className="h-4 w-4" />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="border-t border-white/10 bg-[linear-gradient(180deg,#0b1220_0%,#111827_60%,#f59e0b_180%)] py-24 text-white">
-                  <div className="mx-auto max-w-5xl rounded-[40px] border border-white/10 bg-white/5 px-6 py-14 text-center shadow-2xl shadow-black/30 lg:px-10">
-                    <SectionEyebrow dark>Langkah Berikutnya</SectionEyebrow>
-                    <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-semibold tracking-tight md:text-6xl">
-                      Bicarakan kebutuhan Anda sekarang, lalu lanjutkan ke visit factory untuk analisa yang lebih akurat.
-                    </h2>
-                    <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-200">
-                      Di bagian akhir ini, tujuannya sederhana: mengubah rasa tertarik menjadi percakapan nyata. Jika model Zero Capex Water Infrastructure terasa relevan, tombol WhatsApp di bawah ini adalah langkah paling tepat.
-                    </p>
-
-                    <div className="mt-10 grid gap-4 sm:grid-cols-3">
-                      <NumberStat dark label="Langkah Awal" value="Chat WhatsApp" hint="Mulai dari diskusi singkat mengenai kebutuhan Anda." />
-                      <NumberStat dark label="Tahap Berikutnya" value="Visit Factory" hint="Evaluasi kondisi lapangan untuk analisa yang lebih relevan." />
-                      <NumberStat dark label="Arah Tujuan" value="Keputusan Lebih Yakin" hint="Lebih jelas secara finansial, teknis, dan operasional." />
-                    </div>
-
-                    <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
-                      <a
-                        href={whatsappLink}
-                        target="_blank"
-                        className="inline-flex items-center justify-center gap-2 rounded-full bg-amber-500 px-8 py-5 text-base font-semibold text-slate-950 transition hover:scale-[1.02] hover:bg-amber-400"
-                      >
-                        Chat WhatsApp +6285219493322
-                        <ArrowRight className="h-5 w-5" />
-                      </a>
-                      <a
-                        href={portalLink}
-                        target="_blank"
-                        className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-8 py-5 text-base font-semibold text-white transition hover:bg-white/10"
-                      >
-                        Kunjungi invila.asia
-                        <ChevronRight className="h-5 w-5" />
-                      </a>
-                    </div>
-                  </div>
-                </section>
-              </main>
-            </div>
-          );
+    <style>
+        body { background-color: #94a3b8; font-family: 'Arial', sans-serif; padding-bottom: 50px; overflow-x: hidden; }
+        
+        .alu-frame {
+            background-color: #e2e8f0;
+            border: 20px solid #cbd5e1;
+            border-image: repeating-linear-gradient(45deg, #cbd5e1, #cbd5e1 10px, #94a3b8 10px, #94a3b8 20px) 20;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0,0,0,0.3);
+            border-radius: 8px; padding: 20px; max-width: 1250px; margin: 20px auto 30px auto; position: relative; 
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        #wiring-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+
+        .horizontal-bar {
+            height: 20px; background: repeating-linear-gradient(90deg, #cbd5e1, #cbd5e1 10px, #94a3b8 10px, #94a3b8 20px);
+            margin: 25px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 2px solid #fff; border-bottom: 2px solid #64748b;
+        }
+
+        .acrylic-panel {
+            background-color: #ffffff; border: 1px solid #cbd5e1; position: relative; box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+            display: flex; flex-direction: column; z-index: 10;
+        }
+        
+        .screw {
+            width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+            border: 1px solid #64748b; position: absolute; box-shadow: inset 0 1px 2px rgba(255,255,255,0.8), inset 0 -1px 2px rgba(0,0,0,0.4);
+        }
+        .screw::after {
+            content: ''; position: absolute; top: 4px; left: 2px; right: 2px; height: 1px; background-color: #475569; transform: rotate(45deg);
+        }
+        .screw.tl { top: 6px; left: 6px; } .screw.tr { top: 6px; right: 6px; } .screw.bl { bottom: 6px; left: 6px; } .screw.br { bottom: 6px; right: 6px; }
+
+        .panel-title {
+            text-align: center; font-weight: bold; font-size: 0.85rem; color: #1e293b; padding: 10px 0 5px 0;
+            border-bottom: 2px solid #e2e8f0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .jack-container { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+        .jack {
+            width: 18px; height: 18px; border-radius: 50%; border: 2px solid #475569;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.2); position: relative; margin: 0 auto; background-color: #fff;
+        }
+        .jack::after {
+            content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px; border-radius: 50%; background-color: #0f172a;
+        }
+        .jack.red { background-color: #ef4444; } .jack.black { background-color: #1e293b; } .jack.yellow { background-color: #eab308; }
+        .jack.blue { background-color: #3b82f6; } .jack.green { background-color: #22c55e; }
+        .jack-label { font-size: 0.60rem; font-weight: bold; color: #334155; text-align: center; font-family: monospace;}
+
+        .toggle-switch {
+            width: 20px; height: 36px; background: #94a3b8; border-radius: 3px; position: relative; margin: 0 auto; cursor: pointer;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5); z-index: 60; 
+        }
+        .toggle-knob {
+            width: 24px; height: 14px; background: #f8fafc; border-radius: 2px; position: absolute; left: -2px; bottom: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4); transition: 0.2s;
+        }
+        .toggle-switch.active .toggle-knob { bottom: 20px; background: #e2e8f0; }
+
+        .led {
+            width: 16px; height: 16px; border-radius: 50%; background-color: #475569; border: 2px solid #cbd5e1;
+            margin: 0 auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+        }
+        .led.green.on { background-color: #22c55e; box-shadow: 0 0 10px #22c55e, inset 0 2px 4px rgba(255,255,255,0.4); border-color: #16a34a; }
+        .led.red.on { background-color: #ef4444; box-shadow: 0 0 10px #ef4444, inset 0 2px 4px rgba(255,255,255,0.4); border-color: #dc2626; }
+
+        .btn-estop {
+            width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, #ef4444 30%, #b91c1c 100%);
+            border: 4px solid #7f1d1d; box-shadow: 0 4px 10px rgba(185,28,28,0.6), inset 0 2px 4px rgba(255,255,255,0.4);
+            color: white; font-weight: bold; font-size: 9px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.1s; z-index: 60; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .btn-estop.pressed {
+            transform: scale(0.9) translateY(2px); box-shadow: 0 1px 2px rgba(185,28,28,0.6), inset 0 4px 8px rgba(0,0,0,0.6);
+            background: radial-gradient(circle, #b91c1c 30%, #7f1d1d 100%);
+        }
+
+        .psu-box { background-color: #f1f5f9; border: 1px solid #94a3b8; border-radius: 4px; padding: 10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); }
+        .plc-box { background-color: #111827; border-radius: 4px; border-top: 5px solid #374151; border-bottom: 5px solid #374151; color: white; padding: 12px; font-family: monospace; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .hmi-box { background-color: #1e293b; border: 10px solid #0f172a; border-radius: 6px; color: white; display: flex; flex-direction: column; }
+
+        .hmi-page { display: none; }
+        .hmi-page.active { display: flex; }
+        .hmi-nav-btn { flex: 1; background: #334155; color: #cbd5e1; font-size: 8px; padding: 4px 0; border-radius: 2px; transition: 0.2s; cursor: pointer; text-align: center;}
+        .hmi-nav-btn:hover { background: #475569; }
+        .hmi-nav-btn.active { background: #3b82f6; color: #fff; font-weight: bold; }
+
+        .controls { text-align: center; margin-top: 20px; z-index: 100; position: relative;}
+        .btn-toggle { background: #1e293b; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; border: 2px solid #475569; transition: 0.2s; }
+        .btn-toggle:hover { background: #334155; transform: scale(1.05); }
+        .no-select { user-select: none; -webkit-user-select: none; }
+    </style>
+</head>
+<body>
+
+    <div class="text-center mt-4 mb-2">
+        <h1 class="text-3xl font-bold text-slate-800 drop-shadow-md bg-white inline-block px-6 py-2 rounded-lg border-2 border-slate-300">TRAINER KIT WTP INVILA (ENTERPRISE)</h1>
+        <p class="text-slate-100 font-bold mt-2 text-lg drop-shadow-md">Intake System | SCADA | Anti-Loss of Prime | Dry-Run Interlock</p>
+    </div>
+
+    <div class="controls">
+        <button class="btn-toggle shadow-xl" onclick="toggleWires()">👁️ TAMPILKAN / SEMBUNYIKAN KABEL JUMPER</button>
+    </div>
+
+    <div class="alu-frame" id="main-frame">
+        <svg id="wiring-layer"></svg>
+
+        <div class="flex gap-4 min-h-[420px]">
+            
+            <div class="acrylic-panel w-1/4 p-2">
+                <div class="screw tl"></div><div class="screw tr"></div><div class="screw bl"></div><div class="screw br"></div>
+                <div class="panel-title">MODUL 1: DIGITAL I/O</div>
+                <div class="flex-1 flex flex-col justify-between pb-2">
+                    <div class="grid grid-cols-3 gap-2 p-2 bg-slate-50 border border-slate-200 rounded items-end">
+                        <div class="text-center flex flex-col items-center">
+                            <div class="text-[9px] font-bold mb-1">SW POWER</div>
+                            <div class="toggle-switch" id="sw-power" onclick="toggleSim('power')"><div class="toggle-knob"></div></div>
+                            <div class="jack-container mt-2"><div class="jack yellow" id="j-m1-out1"></div></div>
+                        </div>
+                        <div class="text-center flex flex-col items-center">
+                            <div class="text-[9px] font-bold mb-1">SW AUTO</div>
+                            <div class="toggle-switch" id="sw-auto" onclick="toggleSim('auto')"><div class="toggle-knob"></div></div>
+                            <div class="jack-container mt-2"><div class="jack yellow" id="j-m1-out2"></div></div>
+                        </div>
+                        <div class="text-center flex flex-col items-center">
+                            <div class="text-[9px] font-bold mb-1 text-red-600">E-STOP</div>
+                            <button class="btn-estop" id="sw-estop" onclick="toggleEstop()">STOP</button>
+                            <div class="jack-container mt-1"><div class="jack yellow" id="j-m1-out3"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1 p-2 border-t border-b border-slate-200 mt-2">
+                        <div class="text-center flex flex-col items-center">
+                            <div class="text-[9px] font-bold mb-1 text-green-600">P1 RUN</div>
+                            <div class="led green" id="led-p1"></div>
+                            <div class="jack-container mt-2"><div class="jack blue" id="j-m1-in1"></div><span class="jack-label">IN 1</span></div>
+                        </div>
+                        <div class="text-center flex flex-col items-center">
+                            <div class="text-[9px] font-bold mb-1 text-green-600">P2 RUN</div>
+                            <div class="led green" id="led-p2"></div>
+                            <div class="jack-container mt-2"><div class="jack blue" id="j-m1-in2"></div><span class="jack-label">IN 2</span></div>
+                        </div>
+                        <div class="text-center flex flex-col items-center">
+                            <div class="text-[9px] font-bold mb-1 text-red-600">TRIP</div>
+                            <div class="led red" id="led-trip"></div>
+                            <div class="jack-container mt-2"><div class="jack blue" id="j-m1-in3"></div><span class="jack-label">IN 3</span></div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-around mt-4 bg-slate-100 p-2 rounded">
+                        <div class="jack-container"><div class="jack red" id="j-m1-24v-in"></div><span class="jack-label">+24V IN</span></div>
+                        <div class="jack-container"><div class="jack black" id="j-m1-0v-in"></div><span class="jack-label">0V IN</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acrylic-panel w-2/4 p-2">
+                <div class="screw tl"></div><div class="screw tr"></div><div class="screw bl"></div><div class="screw br"></div>
+                <div class="panel-title">MODUL 2: VFD & FLOW METER CONTROL</div>
+                
+                <div class="flex-1 flex gap-4 p-2">
+                    <div class="w-1/2 bg-slate-50 rounded p-3 border border-slate-300 flex flex-col justify-between shadow-sm">
+                        <div>
+                            <div class="text-[10px] font-bold bg-slate-700 text-white p-1 rounded text-center mb-4">VFD ZHON (SIMULATOR)</div>
+                            <div class="text-[10px] text-slate-500 mb-1 font-bold text-center">SETPOINT FREKUENSI (Hz)</div>
+                            <input type="range" id="pot-vfd" min="0" max="50" step="0.1" value="22.5" class="w-full accent-blue-600 relative z-[60]" oninput="syncVfdToHmi()">
+                            <div class="text-xs text-center text-slate-400 mt-1">Current Output:</div>
+                            <div class="text-3xl font-bold font-mono text-blue-800 text-center mt-1" id="val-hz">0.0 Hz</div>
+                        </div>
+                        <div class="bg-slate-200 p-2 rounded mt-4">
+                            <div class="text-[9px] font-bold text-center mb-2">PORT MODBUS RS485</div>
+                            <div class="flex justify-around">
+                                <div class="jack-container"><div class="jack green" id="j-m2-vfd-485a"></div><span class="jack-label">A+</span></div>
+                                <div class="jack-container"><div class="jack green" id="j-m2-vfd-485b"></div><span class="jack-label">B-</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-1/2 bg-slate-900 rounded p-3 border-2 border-slate-700 flex flex-col justify-between shadow-lg text-white">
+                        <div>
+                            <div class="text-[10px] font-bold text-emerald-400 mb-2 border-b border-slate-600 pb-1 text-center">TUF-2000M ULTRASONIC</div>
+                            <div class="bg-black p-2 border border-slate-700 rounded mb-2">
+                                <div class="text-[9px] text-slate-500">FLOW RATE (m³/h)</div>
+                                <div class="text-3xl font-mono text-emerald-400 text-right" id="val-flow">0.0</div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 mt-2">
+                            <div class="bg-slate-800 p-2 rounded border border-slate-600">
+                                <div class="text-[8px] text-center mb-1 text-slate-400">TRANSDUCER PORT</div>
+                                <div class="flex justify-around">
+                                    <div class="jack-container"><div class="jack black" id="j-m2-tuf-s1"></div><span class="jack-label text-slate-300">S1 (-)</span></div>
+                                    <div class="jack-container"><div class="jack red" id="j-m2-tuf-s2"></div><span class="jack-label text-slate-300">S2 (+)</span></div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-2 rounded border border-slate-600">
+                                <div class="text-[8px] text-center mb-1 text-slate-400">MODBUS RS485</div>
+                                <div class="flex justify-around">
+                                    <div class="jack-container"><div class="jack green" id="j-m2-tuf-485a"></div><span class="jack-label text-slate-300">A+</span></div>
+                                    <div class="jack-container"><div class="jack green" id="j-m2-tuf-485b"></div><span class="jack-label text-slate-300">B-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acrylic-panel w-1/4 p-2">
+                <div class="screw tl"></div><div class="screw tr"></div><div class="screw bl"></div><div class="screw br"></div>
+                <div class="panel-title">MODUL 3: INSTALLATION</div>
+                <div class="flex-1 flex flex-col items-center py-2 bg-slate-50 rounded border border-slate-200">
+                    
+                    <div class="w-[90%] bg-white p-2 rounded border-2 border-slate-300 mb-2 flex flex-col items-center shadow-sm">
+                        <div class="text-[8px] font-bold text-slate-500 mb-1">INTAKE FLOAT SWITCH</div>
+                        <div class="toggle-switch active" id="sw-float" onclick="toggleFloat()"><div class="toggle-knob"></div></div>
+                        <div class="text-[8px] font-bold mt-1 text-green-600" id="lbl-float">OK (AIR TERSEDIA)</div>
+                        <div class="jack-container mt-1"><div class="jack yellow" id="j-m3-out-float"></div></div>
+                    </div>
+
+                    <div class="w-[90%] bg-emerald-50 p-2 rounded border-2 border-emerald-300 mb-2 flex flex-col items-center shadow-sm">
+                        <div class="text-[8px] font-bold text-slate-600 mb-1 text-center">OUTLET FLOW SENSOR</div>
+                        <div class="toggle-switch active" id="sw-outlet" onclick="toggleOutlet()"><div class="toggle-knob"></div></div>
+                        <div class="text-[7px] font-bold mt-1 text-emerald-600 text-center" id="lbl-outlet">FLOW DETECTED<br>(NORMAL)</div>
+                        <div class="jack-container mt-1"><div class="jack yellow" id="j-m3-out-outlet"></div></div>
+                    </div>
+
+                    <div class="w-full flex justify-around px-4 mb-2 mt-auto">
+                        <div class="flex flex-col items-center">
+                            <div class="w-10 h-14 bg-slate-600 rounded-t-lg relative border-2 border-slate-700 flex justify-center items-center shadow-md">
+                                <div class="led green" id="mimic-led-p1"></div>
+                            </div>
+                            <div class="w-3 h-6 bg-blue-400 border-x border-blue-600"></div>
+                            <div class="jack-container mt-1"><div class="jack blue" id="j-m3-in-p1"></div></div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-10 h-14 bg-slate-600 rounded-t-lg relative border-2 border-slate-700 flex justify-center items-center shadow-md">
+                                <div class="led green" id="mimic-led-p2"></div>
+                            </div>
+                            <div class="w-3 h-6 bg-blue-400 border-x border-blue-600"></div>
+                            <div class="jack-container mt-1"><div class="jack blue" id="j-m3-in-p2"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-around w-full mt-2 bg-white p-2 border-t">
+                        <div class="jack-container"><div class="jack black" id="j-m3-s1"></div></div>
+                        <div class="jack-container"><div class="jack black" id="j-m3-0v"></div></div>
+                        <div class="jack-container"><div class="jack red" id="j-m3-s2"></div></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="horizontal-bar"></div>
+
+        <div class="flex gap-4 min-h-[380px]">
+            
+            <div class="acrylic-panel w-1/5 p-2">
+                <div class="screw tl"></div><div class="screw tr"></div><div class="screw bl"></div><div class="screw br"></div>
+                <div class="panel-title">MODUL 4: POWER</div>
+                <div class="flex-1 flex flex-col justify-center items-center gap-6">
+                    <div class="psu-box w-32 h-32 flex flex-col justify-between relative shadow-md">
+                        <div class="absolute top-2 right-2 w-2 h-2 rounded-full bg-green-500 shadow-[0_0_5px_#22c55e]"></div>
+                        <div class="text-[10px] font-bold text-center border-b pb-1 text-slate-700">SMPS 24VDC 5A</div>
+                        <div class="flex justify-around items-end h-full pt-2">
+                            <div class="w-3 h-14 bg-slate-300 rounded-t"></div>
+                            <div class="w-3 h-14 bg-slate-300 rounded-t"></div>
+                            <div class="w-3 h-14 bg-slate-300 rounded-t"></div>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-100 p-3 rounded border border-slate-200">
+                        <div class="text-[9px] font-bold text-center mb-3">TERMINAL DISTRIBUSI</div>
+                        <div class="grid grid-cols-2 gap-y-4 gap-x-2">
+                            <div class="jack-container"><div class="jack red" id="j-m4-24v-1"></div><span class="jack-label">+24V</span></div>
+                            <div class="jack-container"><div class="jack red" id="j-m4-24v-2"></div><span class="jack-label">+24V</span></div>
+                            <div class="jack-container"><div class="jack black" id="j-m4-0v-1"></div><span class="jack-label">0V</span></div>
+                            <div class="jack-container"><div class="jack black" id="j-m4-0v-2"></div><span class="jack-label">0V</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acrylic-panel w-2/5 p-2">
+                <div class="screw tl"></div><div class="screw tr"></div><div class="screw bl"></div><div class="screw br"></div>
+                <div class="panel-title">MODUL 5: PLC OMRON CP2E</div>
+                <div class="flex-1 flex flex-col justify-between px-2 gap-2">
+                    <div class="bg-slate-50 p-2 rounded border border-slate-200 flex flex-col shadow-sm">
+                        <div class="text-[10px] font-bold text-slate-500 flex items-center mb-2 border-b pb-1">IN (CH 0)</div>
+                        <div class="flex gap-4 justify-around">
+                            <div class="jack-container"><div class="jack red" id="j-m5-com-in"></div><span class="jack-label">COM</span></div>
+                            <div class="w-[1px] bg-slate-300"></div>
+                            <div class="jack-container"><div class="jack yellow" id="j-m5-i00"></div><span class="jack-label">0.00</span></div>
+                            <div class="jack-container"><div class="jack yellow" id="j-m5-i01"></div><span class="jack-label">0.01</span></div>
+                            <div class="jack-container"><div class="jack yellow" id="j-m5-i03"></div><span class="jack-label">0.03</span></div>
+                            <div class="jack-container"><div class="jack yellow" id="j-m5-i04"></div><span class="jack-label">0.04</span></div>
+                            <div class="jack-container"><div class="jack yellow" id="j-m5-i05"></div><span class="jack-label text-emerald-600">0.05</span></div>
+                        </div>
+                    </div>
+
+                    <div class="plc-box flex flex-col shadow-lg">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                            <span class="font-bold tracking-widest text-lg text-slate-200">OMRON CP2E-N20</span>
+                            <div class="flex gap-3">
+                                <div class="text-center"><div class="w-2 h-2 rounded-full bg-slate-600 mb-1" id="plc-pwr"></div><span class="text-[8px] text-slate-400">PWR</span></div>
+                                <div class="text-center"><div class="w-2 h-2 rounded-full bg-slate-600 mb-1" id="plc-run"></div><span class="text-[8px] text-slate-400">RUN</span></div>
+                                <div class="text-center"><div class="w-2 h-2 rounded-full bg-slate-600 mb-1" id="plc-err"></div><span class="text-[8px] text-slate-400">ERR</span></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between mt-2">
+                            <div>
+                                <div class="text-[9px] text-slate-400 font-bold mb-1">INPUT STATE</div>
+                                <div class="flex gap-1 p-1 bg-slate-800 rounded">
+                                    <div class="w-3 h-3 bg-slate-600 rounded-sm" id="ind-in-0"></div>
+                                    <div class="w-3 h-3 bg-slate-600 rounded-sm" id="ind-in-1"></div>
+                                    <div class="w-3 h-3 bg-slate-600 rounded-sm" id="ind-in-3"></div>
+                                    <div class="w-3 h-3 bg-slate-600 rounded-sm" id="ind-in-4"></div>
+                                    <div class="w-3 h-3 bg-slate-600 rounded-sm" id="ind-in-5"></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="text-[9px] text-slate-400 font-bold mb-1">ETHERNET</div>
+                                <div class="w-10 h-6 bg-black border-t-2 border-amber-500 flex justify-center items-end pb-1 rounded-sm"><div class="w-1 h-1 bg-green-500 rounded-full animate-pulse"></div></div>
+                            </div>
+                            <div>
+                                <div class="text-[9px] text-slate-400 font-bold mb-1 text-right">OUTPUT STATE</div>
+                                <div class="flex gap-2 p-1 bg-slate-800 rounded">
+                                    <div class="w-3 h-3 bg-slate-600 rounded-sm" id="ind-out-0"></div>
+                                    <div class="w-3 h-3 bg-slate-600 rounded-sm" id="ind-out-1"></div>
+                                    <div class="w-3 h-3 bg-slate-600 rounded-sm" id="ind-out-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-2 rounded border border-slate-200 flex justify-between shadow-sm">
+                        <div class="text-[10px] font-bold text-slate-500 flex items-center">OUT (CH 100)</div>
+                        <div class="flex gap-4">
+                            <div class="jack-container"><div class="jack black" id="j-m5-com-out"></div><span class="jack-label">COM</span></div>
+                            <div class="w-[1px] bg-slate-300"></div>
+                            <div class="jack-container"><div class="jack blue" id="j-m5-q100"></div><span class="jack-label">100.0</span></div>
+                            <div class="jack-container"><div class="jack blue" id="j-m5-q101"></div><span class="jack-label">100.1</span></div>
+                            <div class="jack-container"><div class="jack blue" id="j-m5-q102"></div><span class="jack-label">100.2</span></div>
+                            <div class="w-[1px] bg-slate-300"></div>
+                            <div class="jack-container"><div class="jack green" id="j-m5-485a"></div><span class="jack-label">485 A+</span></div>
+                            <div class="jack-container"><div class="jack green" id="j-m5-485b"></div><span class="jack-label">485 B-</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acrylic-panel w-1/4 p-2 relative z-20">
+                <div class="screw tl"></div><div class="screw tr"></div><div class="screw bl"></div><div class="screw br"></div>
+                <div class="panel-title">MODUL 6: HMI HAIWELL 7"</div>
+                
+                <div class="flex-1 flex items-center justify-center p-1 bg-slate-900 rounded-lg shadow-[0_0_15px_rgba(0,0,0,0.5)] border-4 border-black relative">
+                    <div class="absolute top-1 left-2 text-[8px] text-slate-400 tracking-widest z-10">Haiwell IoT Cloud</div>
+                    
+                    <div class="hmi-box w-full h-full p-1 pt-4 relative overflow-hidden flex flex-col no-select">
+                        <div class="text-[11px] font-bold text-blue-400 mb-1 border-b border-slate-600 pb-1 w-full text-center uppercase tracking-wider">VFD Pump Controller</div>
+                        
+                        <div id="hmi-page-home" class="hmi-page active flex-1 flex-col">
+                            <div class="text-[8px] text-slate-400 mb-1 text-center font-bold tracking-widest mt-1">STATUS</div>
+                            <div class="text-xs font-bold text-slate-400 mb-2 bg-slate-900 w-full py-1 rounded text-center border border-slate-700 shadow-inner" id="hmi-status">SYSTEM READY</div>
+                            
+                            <div class="grid grid-cols-2 gap-2 w-full mb-2">
+                                <div class="bg-black border border-slate-700 p-2 rounded text-center shadow-inner">
+                                    <div class="text-[8px] text-slate-400 mb-1">VFD TARGET</div>
+                                    <div class="text-lg font-mono font-bold text-blue-400" id="hmi-home-vfd">0.0 Hz</div>
+                                </div>
+                                <div class="bg-black border border-slate-700 p-2 rounded text-center shadow-inner">
+                                    <div class="text-[8px] text-slate-400 mb-1">PUMP TIMER</div>
+                                    <div class="text-lg font-mono font-bold text-amber-400" id="hmi-home-timer">12 h</div>
+                                </div>
+                            </div>
+
+                            <div class="w-full bg-black border border-slate-700 mb-2 p-2 rounded text-center shadow-inner">
+                                <div class="text-[8px] text-slate-400">REAL-TIME FLOW (m³/h)</div>
+                                <div class="text-2xl font-mono font-bold text-emerald-400 tracking-wider" id="hmi-flow">0.0</div>
+                            </div>
+                            
+                            <div class="flex gap-2 w-full mt-auto mb-1">
+                                <div class="flex-1 bg-slate-900 p-1 border border-slate-700 rounded transition-colors text-center" id="hmi-box-p1">
+                                    <div class="text-[8px] text-slate-300">PUMP 1 (Hz)</div>
+                                    <div class="text-xs font-mono font-bold text-red-400" id="hmi-hz-p1">0.0</div>
+                                </div>
+                                <div class="flex-1 bg-slate-900 p-1 border border-slate-700 rounded transition-colors text-center" id="hmi-box-p2">
+                                    <div class="text-[8px] text-slate-300">PUMP 2 (Hz)</div>
+                                    <div class="text-xs font-mono font-bold text-red-400" id="hmi-hz-p2">0.0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="hmi-page-flow" class="hmi-page flex-1 flex-col px-1 text-left justify-center">
+                            <div class="text-[10px] text-slate-200 font-bold mb-2 text-center">🌊 FLOW CONTROL</div>
+                            <div class="bg-slate-800 p-2 rounded border border-slate-600 mb-2 shadow-inner">
+                                <div class="text-[8px] text-slate-400 mb-2 text-center">SET TARGET DEBIT (m³/h)</div>
+                                <div class="flex items-center justify-center gap-3">
+                                    <button onpointerdown="startAdjFlow(-1.0)" onpointerup="stopAdj()" onpointerleave="stopAdj()" class="bg-slate-600 w-8 h-8 rounded text-white font-bold hover:bg-slate-500 active:bg-blue-600 flex items-center justify-center shadow transition-colors touch-none cursor-pointer">▼</button>
+                                    <div class="bg-black text-center font-mono font-bold text-emerald-400 text-2xl w-16 py-1 rounded border border-slate-700 shadow-inner" id="hmi-set-flow">27.0</div>
+                                    <button onpointerdown="startAdjFlow(1.0)" onpointerup="stopAdj()" onpointerleave="stopAdj()" class="bg-slate-600 w-8 h-8 rounded text-white font-bold hover:bg-slate-500 active:bg-blue-600 flex items-center justify-center shadow transition-colors touch-none cursor-pointer">▲</button>
+                                </div>
+                            </div>
+                            <div class="text-[8px] text-slate-400 text-center mt-2">VFD Target: <span id="hmi-set-hz" class="font-bold text-blue-300">22.5</span> Hz</div>
+                            <div class="text-[7px] text-amber-400 text-center mt-1">*Max 60.0 m³/h = 50.0 Hz (Linear Scaling)</div>
+                        </div>
+
+                        <div id="hmi-page-man" class="hmi-page flex-1 flex-col px-1 text-center justify-center">
+                            <div class="text-[10px] text-slate-200 font-bold mb-2">🕹️ MANUAL CONTROL</div>
+                            
+                            <div id="man-warning" class="text-[8px] text-red-400 bg-red-900/30 p-1 rounded mb-2 border border-red-800 font-bold hidden">
+                                MATIKAN SW AUTO DI PANEL FISIK!
+                            </div>
+                            
+                            <div class="flex gap-2 w-full justify-center mt-1">
+                                <button id="btn-man-p1" onpointerdown="toggleManualPump(1)" class="w-1/2 py-4 rounded bg-slate-700 text-white font-bold border-2 border-slate-500 hover:bg-slate-600 transition-colors shadow">PUMP 1<br><span id="stat-man-p1" class="text-[10px] font-normal text-slate-300">OFF</span></button>
+                                <button id="btn-man-p2" onpointerdown="toggleManualPump(2)" class="w-1/2 py-4 rounded bg-slate-700 text-white font-bold border-2 border-slate-500 hover:bg-slate-600 transition-colors shadow">PUMP 2<br><span id="stat-man-p2" class="text-[10px] font-normal text-slate-300">OFF</span></button>
+                            </div>
+                            <div class="text-[7px] text-amber-400 mt-3 px-1">*Sistem Interlock: Tidak bisa dinyalakan bersamaan.</div>
+                        </div>
+
+                        <div id="hmi-page-set" class="hmi-page flex-1 flex-col px-1 text-left justify-center">
+                            <div class="text-[10px] text-slate-200 font-bold mb-2 text-center">⚙️ PARAMETERS</div>
+                            <div class="bg-slate-800 p-2 rounded border border-slate-600 mb-2 shadow-inner">
+                                <div class="text-[8px] text-slate-400 mb-1 flex justify-between"><span>TIMER ROTASI POMPA</span><span>(Jam)</span></div>
+                                <div class="flex items-center gap-2">
+                                    <button onpointerdown="startAdjSetting('timer', -1)" onpointerup="stopAdj()" onpointerleave="stopAdj()" class="bg-slate-600 w-6 h-6 rounded text-white text-[10px] hover:bg-slate-500 active:bg-blue-600 flex items-center justify-center shadow transition-colors touch-none cursor-pointer">▼</button>
+                                    <div class="flex-1 bg-black text-center font-mono font-bold text-blue-300 py-1 rounded border border-slate-700 shadow-inner" id="hmi-set-timer">12 h</div>
+                                    <button onpointerdown="startAdjSetting('timer', 1)" onpointerup="stopAdj()" onpointerleave="stopAdj()" class="bg-slate-600 w-6 h-6 rounded text-white text-[10px] hover:bg-slate-500 active:bg-blue-600 flex items-center justify-center shadow transition-colors touch-none cursor-pointer">▲</button>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-2 rounded border border-slate-600 mb-2 shadow-inner">
+                                <div class="text-[8px] text-slate-400 mb-1 flex justify-between"><span>BATAS OVERCURRENT</span><span>(Ampere)</span></div>
+                                <div class="flex items-center gap-2">
+                                    <button onpointerdown="startAdjSetting('trip', -0.1)" onpointerup="stopAdj()" onpointerleave="stopAdj()" class="bg-slate-600 w-6 h-6 rounded text-white text-[10px] hover:bg-slate-500 active:bg-blue-600 flex items-center justify-center shadow transition-colors touch-none cursor-pointer">▼</button>
+                                    <div class="flex-1 bg-black text-center font-mono font-bold text-red-400 py-1 rounded border border-slate-700 shadow-inner" id="hmi-set-trip">5.5 A</div>
+                                    <button onpointerdown="startAdjSetting('trip', 0.1)" onpointerup="stopAdj()" onpointerleave="stopAdj()" class="bg-slate-600 w-6 h-6 rounded text-white text-[10px] hover:bg-slate-500 active:bg-blue-600 flex items-center justify-center shadow transition-colors touch-none cursor-pointer">▲</button>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-50 p-2 rounded border border-slate-200 mt-1">
+                                <div class="text-[8px] font-bold text-center mb-1 text-slate-600">SIMULASI BEBAN MOTOR</div>
+                                <input type="range" id="pot-ampere" min="0" max="100" value="0" class="w-full accent-red-600 h-2">
+                                <div class="text-center font-mono font-bold text-red-600 mt-1 text-[10px]" id="val-ampere">0.0 A</div>
+                            </div>
+                        </div>
+
+                        <div id="hmi-page-diag" class="hmi-page flex-1 flex-col px-1">
+                            <div class="text-[10px] text-slate-200 font-bold mb-1 text-center">⚠️ DIAGNOSTIC & I/O</div>
+                            
+                            <div class="bg-slate-800 p-1 border border-slate-600 rounded mb-1">
+                                <table class="w-full text-[7px] text-left text-slate-300 border-collapse">
+                                    <tr><th class="border-b border-slate-600 pb-1">I/O DIGITAL POINT</th><th class="border-b border-slate-600 pb-1 text-right">STATUS</th></tr>
+                                    <tr><td class="pt-1">I:0.00 (SW POWER)</td><td id="io-pwr" class="pt-1 text-right text-red-400">OFF</td></tr>
+                                    <tr><td>I:0.01 (SW AUTO)</td><td id="io-auto" class="text-right text-red-400">OFF</td></tr>
+                                    <tr><td>I:0.03 (E-STOP)</td><td id="io-estop" class="text-right text-green-400">OK</td></tr>
+                                    <tr><td>I:0.04 (IN FLOAT)</td><td id="io-float" class="text-right text-green-400">HIGH</td></tr>
+                                    <tr><td>I:0.05 (OUT FLOW)</td><td id="io-outlet" class="text-right text-green-400">DETECTED</td></tr>
+                                </table>
+                            </div>
+
+                            <div class="bg-slate-800 p-1 border border-slate-600 rounded flex-1 overflow-hidden flex flex-col">
+                                <div class="text-[7px] text-slate-400 mb-1 border-b border-slate-600 pb-1">TRIP HISTORY</div>
+                                <ul id="alarm-list" class="text-[7px] text-slate-300 list-disc pl-3 overflow-y-auto flex-1">
+                                    <li class="text-green-400">System Normal</li>
+                                </ul>
+                            </div>
+
+                            <button id="btn-hmi-reset" onclick="manualReset()" class="w-full bg-red-600 text-white font-bold text-[10px] py-2 rounded mt-1 hidden hover:bg-red-500 border border-red-800 shadow-md transition-all active:bg-red-800">
+                                🔄 MANUAL RESET ALARM
+                            </button>
+                        </div>
+
+                        <div class="flex gap-1 w-full mt-auto border-t border-slate-600 pt-1">
+                            <button onclick="switchHmiPage('home')" id="btn-nav-home" class="hmi-nav-btn active">HOME</button>
+                            <button onclick="switchHmiPage('flow')" id="btn-nav-flow" class="hmi-nav-btn">FLOW</button>
+                            <button onclick="switchHmiPage('man')" id="btn-nav-man" class="hmi-nav-btn">MAN</button>
+                            <button onclick="switchHmiPage('set')" id="btn-nav-set" class="hmi-nav-btn">SET</button>
+                            <button onclick="switchHmiPage('diag')" id="btn-nav-diag" class="hmi-nav-btn">DIAG</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="max-w-[1250px] mx-auto bg-white p-6 rounded-lg shadow-xl mt-4 mb-10 border-t-4 border-blue-500">
+        <h2 class="text-xl font-bold text-slate-800 mb-4 border-b-2 border-blue-200 pb-2">📘 WIRING GUIDE (TABEL JUMPER KABEL)</h2>
+        <div class="grid grid-cols-2 gap-8">
+            <div>
+                <h3 class="font-bold text-sm mb-3 text-slate-700 bg-slate-100 p-2 rounded">A. Power & Digital Input (Sinking)</h3>
+                <table class="w-full text-xs border-collapse">
+                    <tr class="bg-slate-200 text-left"><th class="p-2 border">Dari Jack Modul</th><th class="p-2 border">Ke Jack Modul</th><th class="p-2 border">Fungsi / Warna</th></tr>
+                    <tr><td class="p-2 border">M4 (+24V Red)</td><td class="p-2 border">M5 (COM IN Red)</td><td class="p-2 border font-bold text-red-600">Power Common Input</td></tr>
+                    <tr><td class="p-2 border">M4 (+24V Red)</td><td class="p-2 border">M1 (+24V IN Red)</td><td class="p-2 border font-bold text-red-600">Power Saklar</td></tr>
+                    <tr><td class="p-2 border">M1 (OUT 1 Yellow)</td><td class="p-2 border">M5 (I:0.00 Yellow)</td><td class="p-2 border font-bold text-yellow-600">SW Power ON</td></tr>
+                    <tr><td class="p-2 border">M1 (OUT 2 Yellow)</td><td class="p-2 border">M5 (I:0.01 Yellow)</td><td class="p-2 border font-bold text-yellow-600">SW Auto Mode</td></tr>
+                    <tr class="bg-red-50"><td class="p-2 border">M1 (E-STOP Yellow)</td><td class="p-2 border">M5 (I:0.03 Yellow)</td><td class="p-2 border font-bold text-red-600">Emergency Stop</td></tr>
+                    <tr class="bg-blue-50"><td class="p-2 border">M3 (FLOAT Yellow)</td><td class="p-2 border">M5 (I:0.04 Yellow)</td><td class="p-2 border font-bold text-blue-600">Sensor Intake (Dry Run)</td></tr>
+                    <tr class="bg-emerald-50"><td class="p-2 border">M3 (OUTLET Yellow)</td><td class="p-2 border">M5 (I:0.05 Yellow)</td><td class="p-2 border font-bold text-emerald-600">Sensor Flow Outlet (Loss Prime)</td></tr>
+                </table>
+            </div>
+            <div>
+                <h3 class="font-bold text-sm mb-3 text-slate-700 bg-slate-100 p-2 rounded">B. Digital Output & Data RS485</h3>
+                <table class="w-full text-xs border-collapse">
+                    <tr class="bg-slate-200 text-left"><th class="p-2 border">Dari Jack Modul</th><th class="p-2 border">Ke Jack Modul</th><th class="p-2 border">Fungsi / Warna</th></tr>
+                    <tr><td class="p-2 border">M4 (0V Black)</td><td class="p-2 border">M5 (COM OUT Blk)</td><td class="p-2 border font-bold text-slate-700">Ground Output NPN</td></tr>
+                    <tr><td class="p-2 border">M4 (0V Black)</td><td class="p-2 border">M1 (0V IN Black)</td><td class="p-2 border font-bold text-slate-700">Ground Lampu LED</td></tr>
+                    <tr><td class="p-2 border">M5 (Q:100.0 Blue)</td><td class="p-2 border">M1 (IN 1 Blue)</td><td class="p-2 border font-bold text-blue-600">Nyalakan LED P1</td></tr>
+                    <tr><td class="p-2 border">M5 (Q:100.1 Blue)</td><td class="p-2 border">M1 (IN 2 Blue)</td><td class="p-2 border font-bold text-blue-600">Nyalakan LED P2</td></tr>
+                    <tr><td class="p-2 border">M5 (RS485 A+)</td><td class="p-2 border">M2 (VFD A+)</td><td class="p-2 border font-bold text-green-600">Modbus Daisy A+</td></tr>
+                    <tr><td class="p-2 border">M2 (VFD A+)</td><td class="p-2 border">M2 (TUF A+)</td><td class="p-2 border font-bold text-green-600">Modbus Daisy A+</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- WIRING LAYER SCRIPT ---
+        let wiresVisible = true;
+        const svg = document.getElementById('wiring-layer');
+
+        const connections = [
+            { from: 'j-m4-24v-1', to: 'j-m5-com-in', color: 'rgba(239, 68, 68, 0.85)', drop: 60 },
+            { from: 'j-m4-24v-2', to: 'j-m1-24v-in', color: 'rgba(239, 68, 68, 0.85)', drop: 150 },
+            { from: 'j-m4-0v-1', to: 'j-m5-com-out', color: 'rgba(30, 41, 59, 0.85)', drop: 50 },
+            { from: 'j-m4-0v-2', to: 'j-m1-0v-in', color: 'rgba(30, 41, 59, 0.85)', drop: 120 },
+            { from: 'j-m3-0v', to: 'j-m4-0v-2', color: 'rgba(30, 41, 59, 0.85)', drop: 100 }, 
+            
+            { from: 'j-m1-out1', to: 'j-m5-i00', color: 'rgba(234, 179, 8, 0.85)', drop: 90 },
+            { from: 'j-m1-out2', to: 'j-m5-i01', color: 'rgba(234, 179, 8, 0.85)', drop: 75 },
+            { from: 'j-m1-out3', to: 'j-m5-i03', color: 'rgba(234, 179, 8, 0.85)', drop: 60 }, 
+            { from: 'j-m3-out-float', to: 'j-m5-i04', color: 'rgba(234, 179, 8, 0.85)', drop: -120 },
+            { from: 'j-m3-out-outlet', to: 'j-m5-i05', color: 'rgba(234, 179, 8, 0.85)', drop: -100 },
+            
+            { from: 'j-m5-q100', to: 'j-m1-in1', color: 'rgba(59, 130, 246, 0.85)', drop: -130 },
+            { from: 'j-m5-q101', to: 'j-m1-in2', color: 'rgba(59, 130, 246, 0.85)', drop: -110 },
+            { from: 'j-m5-q102', to: 'j-m1-in3', color: 'rgba(59, 130, 246, 0.85)', drop: -90 },
+            
+            { from: 'j-m5-q100', to: 'j-m3-in-p1', color: 'rgba(96, 165, 250, 0.85)', drop: -150 },
+            { from: 'j-m5-q101', to: 'j-m3-in-p2', color: 'rgba(96, 165, 250, 0.85)', drop: -170 },
+            
+            { from: 'j-m5-485a', to: 'j-m2-vfd-485a', color: 'rgba(34, 197, 94, 0.85)', drop: -60 },
+            { from: 'j-m2-vfd-485a', to: 'j-m2-tuf-485a', color: 'rgba(34, 197, 94, 0.85)', drop: 30 },
+            { from: 'j-m5-485b', to: 'j-m2-vfd-485b', color: 'rgba(21, 128, 61, 0.85)', drop: -40 },
+            { from: 'j-m2-vfd-485b', to: 'j-m2-tuf-485b', color: 'rgba(21, 128, 61, 0.85)', drop: 50 },
+            { from: 'j-m3-s1', to: 'j-m2-tuf-s1', color: 'rgba(30, 41, 59, 0.85)', drop: 60 },
+            { from: 'j-m3-s2', to: 'j-m2-tuf-s2', color: 'rgba(239, 68, 68, 0.85)', drop: 80 }
+        ];
+
+        function drawAllWires() {
+            svg.innerHTML = ''; 
+            if (!wiresVisible) return;
+            const svgRect = svg.getBoundingClientRect();
+            connections.forEach(conn => {
+                const el1 = document.getElementById(conn.from);
+                const el2 = document.getElementById(conn.to);
+                if (!el1 || !el2) return; 
+                const r1 = el1.getBoundingClientRect();
+                const r2 = el2.getBoundingClientRect();
+                const x1 = (r1.left + r1.width / 2) - svgRect.left;
+                const y1 = (r1.top + r1.height / 2) - svgRect.top;
+                const x2 = (r2.left + r2.width / 2) - svgRect.left;
+                const y2 = (r2.top + r2.height / 2) - svgRect.top;
+                const controlY = Math.max(y1, y2) + conn.drop; 
+                
+                const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                shadow.setAttribute('d', `M ${x1} ${y1} Q ${(x1 + x2) / 2} ${controlY} ${x2} ${y2}`);
+                shadow.setAttribute('stroke', 'rgba(0,0,0,0.3)');
+                shadow.setAttribute('stroke-width', '6');
+                shadow.setAttribute('fill', 'none');
+                shadow.setAttribute('transform', 'translate(0, 4)');
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M ${x1} ${y1} Q ${(x1 + x2) / 2} ${controlY} ${x2} ${y2}`);
+                path.setAttribute('stroke', conn.color);
+                path.setAttribute('stroke-width', '4');
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-linecap', 'round');
+                
+                const highlight = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                highlight.setAttribute('d', `M ${x1} ${y1} Q ${(x1 + x2) / 2} ${controlY} ${x2} ${y2}`);
+                highlight.setAttribute('stroke', 'rgba(255,255,255,0.4)');
+                highlight.setAttribute('stroke-width', '1');
+                highlight.setAttribute('fill', 'none');
+                highlight.setAttribute('transform', 'translate(0, -1)');
+
+                svg.appendChild(shadow);
+                svg.appendChild(path);
+                svg.appendChild(highlight);
+            });
+        }
+
+        function toggleWires() { wiresVisible = !wiresVisible; drawAllWires(); }
+        window.addEventListener('resize', drawAllWires);
+        setTimeout(drawAllWires, 300); 
+
+        // --- CORE SCADA LOGIC ---
+        let isPowerOn = false;
+        let isAuto = false;
+        let isEstop = false;
+        let hasWater = true;
+        let isOutletFlowing = true; 
+        let activePump = 0; 
+        let isTrip = false;
+        
+        // ENGINEERING PARAMETERS
+        let paramTargetFlow = 27.0; // Input HMI (DEFAULT 27.0 m3/h)
+        let targetHz = 0.0; 
+        let currentHz = 0.0; 
+        let paramTimerRotasi = 12; 
+        let paramBatasTrip = 5.5; 
+
+        let rotationTimer = null;
+        let adjInterval = null; 
+        let lossOfPrimeTimer = 0; 
+        
+        // VFD Engine Loop (Real-time Physics) - 10 ticks per second (100ms)
+        setInterval(() => {
+            if(!isPowerOn || isEstop) {
+                currentHz = 0;
+            } else {
+                // Konversi Flow Target ke Target Frekuensi (Linear Scaling: 60 m3/h = 50 Hz)
+                if (activePump > 0 && !isTrip && hasWater) {
+                    targetHz = (paramTargetFlow / 60.0) * 50.0;
+                } else {
+                    targetHz = 0;
+                }
+
+                // Ramp Up / Ramp Down Logic (2.0 Hz per second = 0.2 Hz per tick)
+                const rampStep = 0.2;
+                if (currentHz < targetHz) {
+                    currentHz += rampStep;
+                    if (currentHz > targetHz) currentHz = targetHz;
+                } else if (currentHz > targetHz) {
+                    currentHz -= rampStep;
+                    if (currentHz < targetHz) currentHz = targetHz;
+                }
+            }
+
+            // LOSS OF PRIME TIMER LOGIC (10 Seconds delay)
+            if (!isTrip && isPowerOn && !isEstop) {
+                if (activePump > 0 && currentHz > 5.0 && !isOutletFlowing) {
+                    lossOfPrimeTimer += 100; 
+                    if (lossOfPrimeTimer >= 10000) { 
+                        triggerTrip("LOSS OF PRIME (NO OUTLET FLOW)");
+                        lossOfPrimeTimer = 0;
+                    }
+                } else {
+                    lossOfPrimeTimer = 0; 
+                }
+            }
+
+            updateDisplays();
+        }, 100);
+
+        function switchHmiPage(pageId) {
+            document.querySelectorAll('.hmi-page').forEach(el => el.classList.remove('active'));
+            document.getElementById('hmi-page-' + pageId).classList.add('active');
+            document.querySelectorAll('.hmi-nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('btn-nav-' + pageId).classList.add('active');
+        }
+
+        // FUNGSI MANUAL PUMP
+        function toggleManualPump(pumpNum) {
+            if(!isPowerOn || isEstop) return;
+            
+            if(isAuto) {
+                const warn = document.getElementById('man-warning');
+                warn.classList.remove('hidden');
+                setTimeout(() => warn.classList.add('hidden'), 2000);
+                return;
+            }
+
+            if(isTrip || !hasWater) return;
+
+            if(activePump === pumpNum) {
+                activePump = 0; // Turn off
+            } else if (activePump !== 0) {
+                const btn = document.getElementById('btn-man-p' + pumpNum);
+                const oldColor = btn.style.backgroundColor;
+                btn.style.backgroundColor = '#ef4444';
+                setTimeout(() => btn.style.backgroundColor = oldColor, 300);
+                return; 
+            } else {
+                activePump = pumpNum; // Turn on
+            }
+            updateUI();
+        }
+
+        function startAdjFlow(amount) { adjFlow(amount); adjInterval = setInterval(() => { adjFlow(amount); }, 150); }
+        function startAdjSetting(type, amount) { adjSetting(type, amount); adjInterval = setInterval(() => { adjSetting(type, amount); }, 150); }
+        function stopAdj() { if(adjInterval) { clearInterval(adjInterval); adjInterval = null; } }
+
+        function adjFlow(amount) {
+            let newVal = paramTargetFlow + amount;
+            newVal = Math.round(newVal * 10) / 10;
+            paramTargetFlow = Math.max(0, Math.min(60.0, newVal)); // Max 60.0 m3/h
+            
+            let calculatedHz = (paramTargetFlow / 60.0) * 50.0;
+
+            document.getElementById('hmi-set-flow').innerText = paramTargetFlow.toFixed(1);
+            document.getElementById('hmi-set-hz').innerText = calculatedHz.toFixed(1);
+            
+            const potVfd = document.getElementById('pot-vfd');
+            if(potVfd) potVfd.value = calculatedHz.toFixed(1);
+        }
+
+        function adjSetting(type, amount) {
+            if(type === 'timer') {
+                paramTimerRotasi = Math.max(1, Math.min(48, paramTimerRotasi + amount)); 
+                document.getElementById('hmi-set-timer').innerText = paramTimerRotasi + " h";
+                document.getElementById('hmi-home-timer').innerText = paramTimerRotasi + " h";
+                if(isPowerOn && isAuto && !isTrip) startRotation(); 
+            } else if(type === 'trip') {
+                let newVal = paramBatasTrip + amount;
+                newVal = Math.round(newVal * 10) / 10;
+                paramBatasTrip = Math.max(2.0, Math.min(10.0, newVal)); 
+                document.getElementById('hmi-set-trip').innerText = paramBatasTrip.toFixed(1) + " A";
+            }
+        }
+
+        function syncVfdToHmi() {
+            const potVfd = document.getElementById('pot-vfd');
+            if(potVfd) {
+                let slidedHz = parseFloat(potVfd.value);
+                paramTargetFlow = (slidedHz / 50.0) * 60.0;
+                document.getElementById('hmi-set-flow').innerText = paramTargetFlow.toFixed(1);
+                document.getElementById('hmi-set-hz').innerText = slidedHz.toFixed(1);
+            }
+        }
+
+        function toggleSim(type) {
+            if(isEstop && type === 'auto') return; 
+
+            if(type === 'power') {
+                const el = document.getElementById('sw-power');
+                el.classList.toggle('active');
+                isPowerOn = el.classList.contains('active');
+                
+                if(!isPowerOn) {
+                    isAuto = false;
+                    document.getElementById('sw-auto').classList.remove('active');
+                    isTrip = false;
+                    activePump = 0;
+                    if(rotationTimer) clearInterval(rotationTimer);
+                }
+            }
+            
+            if(type === 'auto') {
+                if(!isPowerOn || isTrip || !hasWater) return;
+                const el = document.getElementById('sw-auto');
+                el.classList.toggle('active');
+                isAuto = el.classList.contains('active');
+
+                if(isAuto) {
+                    activePump = 1; 
+                    startRotation();
+                } else {
+                    activePump = 0; 
+                    if(rotationTimer) clearInterval(rotationTimer);
+                }
+            }
+            updateUI();
+        }
+
+        function toggleEstop() {
+            isEstop = !isEstop;
+            const btn = document.getElementById('sw-estop');
+            if(isEstop) {
+                btn.classList.add('pressed');
+                triggerTrip("E-STOP PRESSED!");
+            } else {
+                btn.classList.remove('pressed');
+            }
+            updateUI();
+        }
+
+        function toggleFloat() {
+            hasWater = !hasWater;
+            const sw = document.getElementById('sw-float');
+            const lbl = document.getElementById('lbl-float');
+            if(hasWater) {
+                sw.classList.add('active');
+                lbl.innerText = "OK (AIR TERSEDIA)";
+                lbl.className = "text-[8px] font-bold mt-1 text-green-600";
+            } else {
+                sw.classList.remove('active');
+                lbl.innerText = "KOSONG (DRY RUN)";
+                lbl.className = "text-[8px] font-bold mt-1 text-red-600";
+                if(activePump > 0) triggerTrip("DRY RUN (INTAKE EMPTY)");
+            }
+            updateUI();
+        }
+
+        function toggleOutlet() {
+            isOutletFlowing = !isOutletFlowing;
+            const sw = document.getElementById('sw-outlet');
+            const lbl = document.getElementById('lbl-outlet');
+            if(isOutletFlowing) {
+                sw.classList.add('active');
+                lbl.innerHTML = "FLOW DETECTED<br>(NORMAL)";
+                lbl.className = "text-[7px] font-bold mt-1 text-emerald-600 text-center";
+            } else {
+                sw.classList.remove('active');
+                lbl.innerHTML = "NO FLOW<br>(LEAK / AIR LOCK)";
+                lbl.className = "text-[7px] font-bold mt-1 text-red-600 text-center";
+            }
+            updateUI();
+        }
+
+        function triggerTrip(reason) {
+            isTrip = true;
+            const failedPump = activePump;
+            activePump = 0;
+            targetHz = 0;
+            if(reason === "E-STOP PRESSED!") currentHz = 0; // Cut off instan
+            
+            if(rotationTimer) clearInterval(rotationTimer);
+            addAlarmHistory(reason);
+            updateUI();
+        }
+
+        // Fungsi Manual Reset
+        function manualReset() {
+            if (!isTrip) return;
+            if (isEstop) {
+                alert("Lepas tombol E-STOP terlebih dahulu!");
+                return;
+            }
+            isTrip = false;
+            addAlarmHistory("🛠️ Manual Reset Executed");
+            updateUI();
+        }
+
+        function addAlarmHistory(msg) {
+            const list = document.getElementById('alarm-list');
+            if(!list) return;
+            const li = document.createElement('li');
+            li.className = msg.includes("Reset") ? "text-blue-400" : "text-red-400";
+            li.innerText = new Date().toLocaleTimeString() + " - " + msg;
+            list.prepend(li);
+            if(list.children.length > 5) list.removeChild(list.lastChild); 
+        }
+
+        // FUNGSI UPDATE UI
+        function updateDisplays() {
+            if(!isPowerOn) {
+                document.getElementById('val-hz').innerText = "0.0 Hz";
+                document.getElementById('val-flow').innerText = "0.0";
+                document.getElementById('val-ampere').innerText = "0.0 A";
+                document.getElementById('hmi-flow').innerText = "0.0";
+                document.getElementById('hmi-home-vfd').innerText = "0.0 Hz";
+                document.getElementById('hmi-hz-p1').innerText = "0.0";
+                document.getElementById('hmi-hz-p2').innerText = "0.0";
+                document.getElementById('hmi-diag-press').innerText = "0.0 Bar";
+                return;
+            }
+
+            // Jika outlet tidak flowing, flow rate ultrasonic terbaca 0 m3/h meskipun vfd jalan
+            let flowRate = isOutletFlowing ? ((currentHz / 50.0) * 60.0) : 0.0; 
+            let pressure = (currentHz / 50.0) * 4.0; // Simulasi Max 4 Bar pada 50Hz
+            
+            document.getElementById('val-hz').innerText = currentHz.toFixed(1) + " Hz";
+            document.getElementById('val-flow').innerText = flowRate.toFixed(1);
+            document.getElementById('hmi-flow').innerText = flowRate.toFixed(1);
+            document.getElementById('hmi-home-vfd').innerText = currentHz.toFixed(1) + " Hz";
+            document.getElementById('hmi-diag-press').innerText = pressure.toFixed(1) + " Bar";
+
+            if(activePump === 1) {
+                document.getElementById('hmi-hz-p1').innerText = currentHz.toFixed(1);
+                document.getElementById('hmi-hz-p2').innerText = "0.0";
+            } else if(activePump === 2) {
+                document.getElementById('hmi-hz-p1').innerText = "0.0";
+                document.getElementById('hmi-hz-p2').innerText = currentHz.toFixed(1);
+            } else {
+                document.getElementById('hmi-hz-p1').innerText = "0.0";
+                document.getElementById('hmi-hz-p2').innerText = "0.0";
+            }
+
+            // Simulasi Trip Load Ampere
+            const potAmp = document.getElementById('pot-ampere');
+            let ampere = (currentHz > 0) ? parseFloat(potAmp ? potAmp.value / 10 : 0).toFixed(1) : "0.0";
+            
+            document.getElementById('val-ampere').innerText = ampere + " A";
+
+            // Deteksi Overcurrent
+            if(parseFloat(ampere) > paramBatasTrip && !isTrip && currentHz > 10.0) {
+                triggerTrip(`OVERCURRENT (> ${paramBatasTrip.toFixed(1)}A)`);
+            }
+        }
+
+        function startRotation() {
+            if(rotationTimer) clearInterval(rotationTimer);
+            rotationTimer = setInterval(() => {
+                if(isAuto && !isTrip && hasWater) {
+                    activePump = (activePump === 1) ? 2 : 1;
+                    updateUI();
+                }
+            }, paramTimerRotasi * 1000); 
+        }
+
+        function updateUI() {
+            const setClass = (id, cls, state) => { const e = document.getElementById(id); if(e) state ? e.classList.add(cls) : e.classList.remove(cls); };
+            const setBg = (id, color) => { const e = document.getElementById(id); if(e) e.style.backgroundColor = color; };
+            const setBorder = (id, color) => { const e = document.getElementById(id); if(e) e.style.borderColor = color; };
+            const setText = (id, text) => { const e = document.getElementById(id); if(e) e.innerHTML = text; };
+
+            // Panel LEDs
+            setClass('led-p1', 'on', activePump === 1 && !isTrip);
+            setClass('led-p2', 'on', activePump === 2 && !isTrip);
+            setClass('led-trip', 'on', isTrip);
+            setClass('mimic-led-p1', 'on', activePump === 1 && !isTrip);
+            setClass('mimic-led-p2', 'on', activePump === 2 && !isTrip);
+
+            // I/O & PLC Indikator
+            setBg('ind-in-0', isPowerOn ? '#facc15' : '#475569');
+            setBg('ind-in-1', isAuto ? '#facc15' : '#475569');
+            setBg('ind-in-3', isEstop ? '#facc15' : '#475569'); 
+            setBg('ind-in-4', hasWater ? '#facc15' : '#475569'); 
+            setBg('ind-in-5', isOutletFlowing ? '#facc15' : '#475569'); 
+
+            setBg('ind-out-0', (activePump === 1 && !isTrip) ? '#facc15' : '#475569');
+            setBg('ind-out-1', (activePump === 2 && !isTrip) ? '#facc15' : '#475569');
+            setBg('ind-out-2', isTrip ? '#facc15' : '#475569');
+            setBg('plc-err', isTrip ? '#ef4444' : '#475569');
+
+            // HMI Status Label & Reset Button
+            const btnReset = document.getElementById('btn-hmi-reset');
+            if(!isPowerOn) {
+                setText('hmi-status', "SYSTEM OFF");
+                document.getElementById('hmi-status').style.color = '#64748b';
+                btnReset.classList.add('hidden');
+            } else if(isEstop) {
+                setText('hmi-status', "EMERGENCY STOP");
+                document.getElementById('hmi-status').style.color = '#ef4444';
+                btnReset.classList.add('hidden');
+            } else if(isTrip) {
+                setText('hmi-status', "SYSTEM TRIPPED");
+                document.getElementById('hmi-status').style.color = '#ef4444';
+                btnReset.classList.remove('hidden'); 
+            } else if(!hasWater) {
+                setText('hmi-status', "DRY RUN PROTECT");
+                document.getElementById('hmi-status').style.color = '#ef4444';
+                btnReset.classList.add('hidden');
+            } else if(isAuto) {
+                setText('hmi-status', "AUTO RUN");
+                document.getElementById('hmi-status').style.color = '#4ade80';
+                btnReset.classList.add('hidden');
+            } else {
+                setText('hmi-status', "SYSTEM READY (MANUAL)");
+                document.getElementById('hmi-status').style.color = '#4ade80';
+                btnReset.classList.add('hidden');
+            }
+
+            // HMI Active Pump Border
+            setBorder('hmi-box-p1', (activePump === 1) ? '#3b82f6' : '#334155');
+            setBg('hmi-box-p1', (activePump === 1) ? '#1e3a8a' : '#0f172a');
+            setBorder('hmi-box-p2', (activePump === 2) ? '#3b82f6' : '#334155');
+            setBg('hmi-box-p2', (activePump === 2) ? '#1e3a8a' : '#0f172a');
+
+            // HMI Manual Buttons
+            setBg('btn-man-p1', (activePump === 1) ? '#3b82f6' : '#334155');
+            setBorder('btn-man-p1', (activePump === 1) ? '#60a5fa' : '#475569');
+            setText('stat-man-p1', (activePump === 1) ? 'ON' : 'OFF');
+            setBg('btn-man-p2', (activePump === 2) ? '#3b82f6' : '#334155');
+            setBorder('btn-man-p2', (activePump === 2) ? '#60a5fa' : '#475569');
+            setText('stat-man-p2', (activePump === 2) ? 'ON' : 'OFF');
+
+            // I/O Diagnostic Table Text
+            setText('io-pwr', isPowerOn ? '<span class="text-green-400 font-bold">ON</span>' : '<span class="text-red-400">OFF</span>');
+            setText('io-auto', isAuto ? '<span class="text-green-400 font-bold">ON</span>' : '<span class="text-red-400">OFF</span>');
+            setText('io-estop', isEstop ? '<span class="text-red-400 font-bold">PRESSED</span>' : '<span class="text-green-400">OK</span>');
+            setText('io-float', hasWater ? '<span class="text-green-400">HIGH</span>' : '<span class="text-red-400 font-bold">LOW</span>');
+            setText('io-outlet', isOutletFlowing ? '<span class="text-green-400">DETECTED</span>' : '<span class="text-red-400 font-bold">LOSS PRIME</span>');
+        }
+
     </script>
 </body>
 </html>
